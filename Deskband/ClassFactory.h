@@ -3,7 +3,7 @@
 #include <unknwn.h> // for IClassFactory
 #include <windows.h>
 
-class CClassFactory : public IClassFactory
+class ClassFactory : public IClassFactory
 {
 public:
     // IUnknown
@@ -15,10 +15,10 @@ public:
     STDMETHODIMP CreateInstance(IUnknown *pUnkOuter, REFIID riid, void **ppv);
     STDMETHODIMP LockServer(BOOL fLock);
 
-    CClassFactory();
+    ClassFactory();
 
 protected:
-    ~CClassFactory();
+    ~ClassFactory();
 
 private:
     LONG m_cRef;

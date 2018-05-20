@@ -1,4 +1,4 @@
-// dllmain.cpp : Defines the entry point for the DLL application.
+// dllmain.cpp : Defines the exported functions for the DLL application.
 #include "stdafx.h"
 #include <windows.h>
 #include <strsafe.h> // for StringCchXXX functions
@@ -39,7 +39,7 @@ STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, void **ppv)
 	{
 		hr = E_OUTOFMEMORY;
 
-		CClassFactory *pClassFactory = new CClassFactory();
+		ClassFactory *pClassFactory = new ClassFactory();
 		if (pClassFactory)
 		{
 			hr = pClassFactory->QueryInterface(riid, ppv);
@@ -77,7 +77,7 @@ HRESULT RegisterServer()
 			&hKey,
 			NULL))
 		{
-			WCHAR const szName[] = L"DeskBand Sample";
+			WCHAR const szName[] = L"Moniband";
 			if (ERROR_SUCCESS == RegSetValueExW(hKey,
 				NULL,
 				0,
