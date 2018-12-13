@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -155,6 +155,7 @@
   <ItemGroup>
     <ClInclude Include="ClassFactory.h" />
     <ClInclude Include="constants.h" />
+    <ClInclude Include="CpuRamGraph.h" />
     <ClInclude Include="Graph.h" />
     <ClInclude Include="HostBand.h" />
     <ClInclude Include="stdafx.h" />
@@ -163,6 +164,7 @@
   <ItemGroup>
     <ClCompile Include="ClassFactory.cpp" />
     <ClCompile Include="constants.cpp" />
+    <ClCompile Include="CpuRamGraph.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="Graph.cpp" />
     <ClCompile Include="HostBand.cpp" />

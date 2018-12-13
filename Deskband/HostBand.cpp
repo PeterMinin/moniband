@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "constants.h"
 #include "HostBand.h"
+#include "CpuRamGraph.h"
 
 #include <spdlog/sinks/rotating_file_sink.h>
 #include <spdlog/sinks/null_sink.h>
