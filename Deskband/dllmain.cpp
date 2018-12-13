@@ -1,13 +1,11 @@
 // dllmain.cpp : Defines the exported functions for the DLL application.
 #include "stdafx.h"
-#include <windows.h>
+#include "constants.h"
+#include "ClassFactory.h"
+
 #include <strsafe.h> // for StringCchXXX functions
 #include <olectl.h> // for SELFREG_E_CLASS
 #include <shlobj.h> // for ICatRegister
-#include "ClassFactory.h" // for the class factory
-
-// {F30D8CB1-2976-4B0E-813F-AA4C52C7D459}
-CLSID DeskBandCLSID = { 0xf30d8cb1, 0x2976, 0x4B0E,{ 0x81, 0x3f, 0xaa, 0x4c, 0x52, 0xc7, 0xd4, 0x59 } };
 
 HINSTANCE   g_hInst = NULL;
 long        g_cDllRef = 0;
@@ -21,7 +19,6 @@ BOOL APIENTRY DllMain( HMODULE hModule,
     {
     case DLL_PROCESS_ATTACH:
 		g_hInst = hModule;
-		DisableThreadLibraryCalls(hModule);
 		break;
     case DLL_THREAD_ATTACH:
     case DLL_THREAD_DETACH:
@@ -77,13 +74,12 @@ HRESULT RegisterServer()
 			&hKey,
 			NULL))
 		{
-			WCHAR const szName[] = L"Moniband";
 			if (ERROR_SUCCESS == RegSetValueExW(hKey,
 				NULL,
 				0,
 				REG_SZ,
-				(LPBYTE)szName,
-				sizeof(szName)))
+				(LPBYTE)AppName.c_str(),
+				(AppName.length() + 1) * sizeof(AppName[0])))  // must include the size of the terminating null character
 			{
 				hr = S_OK;
 			}

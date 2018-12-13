@@ -64,5 +64,7 @@ private:
 	DWORD               m_dwBandID;             // ID of deskband
 	HWND                m_hwnd;                 // main window of deskband
 	HWND                m_hwndParent;           // parent window of deskband
+
+	std::shared_ptr<spdlog::logger> m_logger;
 };
 

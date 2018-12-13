@@ -1,10 +1,16 @@
 #include "stdafx.h"
+#include "constants.h"
 #include "HostBand.h"
+
+#include <spdlog/sinks/rotating_file_sink.h>
+#include <spdlog/sinks/null_sink.h>
 
 #include <windows.h>
 #include <uxtheme.h>
 #include <time.h>
 #include <cstdio>
+#include <locale>
+#include <codecvt>
 
 #define RECTWIDTH(x)   ((x).right - (x).left)
 #define RECTHEIGHT(x)  ((x).bottom - (x).top)
@@ -12,14 +18,37 @@
 extern ULONG        g_cDllRef;
 extern HINSTANCE    g_hInst;
 
-extern CLSID DeskBandCLSID;
-
 static const WCHAR g_szWindowClass[] = L"MonibandDeskband";
 static const UINT_PTR g_TickTimerID = 1;
+
+const bool enableLogging = true;
+const std::string mainLoggerId = "main_logger";
 
 HostBand::HostBand() :
 	m_cRef(1), m_pSite(NULL), m_dwBandID(0), m_hwnd(NULL), m_hwndParent(NULL)
 {
+	if (enableLogging)
+	{
+		PWSTR dataDirectoryParent;
+		if (SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, NULL, &dataDirectoryParent) != S_OK)
+			throw std::runtime_error("SHGetKnownFolderPath failed");
+		std::wstring appDataDirectory = std::wstring(dataDirectoryParent) + L"\\" + AppName;
+		if (CreateDirectoryW(appDataDirectory.c_str(), NULL) == 0
+				&& GetLastError() != ERROR_ALREADY_EXISTS)
+			throw std::runtime_error(fmt::format("Error creating directory: code {}", GetLastError()));
+		std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
+		std::string logFilePath = converter.to_bytes(appDataDirectory + L"\\Deskband.log");
+
+		const size_t maxLogFileBytes = 1 * 1024 * 1024L;
+		const int maxLogFiles = 3;
+		m_logger = spdlog::rotating_logger_mt(mainLoggerId, logFilePath, maxLogFileBytes, maxLogFiles);
+	}
+	else
+	{
+		m_logger = spdlog::create<spdlog::sinks::null_sink_st>(mainLoggerId);
+	}
+	m_logger->info("Logging started");
+	m_logger->flush();
 }
 
 HostBand::~HostBand()
@@ -28,6 +57,8 @@ HostBand::~HostBand()
 	{
 		m_pSite->Release();
 	}
+	m_logger->info("Logging stopped");
+	m_logger->flush();
 }
 
 //
@@ -414,6 +445,7 @@ void HostBand::OnPaint(const HDC hdcIn)
 
 LRESULT CALLBACK HostBand::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+	auto logger = spdlog::get(mainLoggerId);
 	LRESULT lResult = 0;
 
 	HostBand*pDeskBand = reinterpret_cast<HostBand*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
@@ -421,6 +453,8 @@ LRESULT CALLBACK HostBand::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM l
 	switch (uMsg)
 	{
 	case WM_CREATE:
+		logger->info("WM_CREATE, hwnd {}", (long long) hwnd);
+		logger->flush();
 		pDeskBand = reinterpret_cast<HostBand*>(reinterpret_cast<CREATESTRUCT *>(lParam)->lpCreateParams);
 		pDeskBand->m_hwnd = hwnd;
 		SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pDeskBand));
